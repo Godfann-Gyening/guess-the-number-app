@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guessing the Number Game</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Guessing the Number Game</h1>
+    <div id="game-setup">
+      <p>Select a range of numbers to start the game:</p>
+      <label><input type="radio" name="range" value="10"> 10</label>
+      <label><input type="radio" name="range" value="100"> 100</label>
+      <label><input type="radio" name="range" value="1000"> 1000</label>
+      <br><br>
+      <button id="start-btn" disabled>Start</button>
+    </div>
+
+    <div id="game-play" style="display: none;">
+      <p>Guess a number between 1 and <span id="range-display"></span>:</p>
+      <input type="number" id="guess-input" min="1">
+      <button id="check-btn">Check</button>
+      <p>Number of guesses left: <span id="guesses-left"></span></p>
+      <div id="guesses-list">
+        <h3>Your Guesses:</h3>
+        <ul id="guesses"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for game over -->
+  <div id="game-over-modal" style="display: none;">
+    <div class="modal-content">
+      <p id="game-over-message"></p>
+      <button id="play-again-btn">Play Again</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
