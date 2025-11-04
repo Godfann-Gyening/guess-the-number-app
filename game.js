@@ -17,11 +17,27 @@ const guessesList = document.getElementById("guesses");
 const gameOverModal = document.getElementById("game-over-modal");
 const gameOverMessage = document.getElementById("game-over-message");
 const playAgainBtn = document.getElementById("play-again-btn");
+const statusEl = document.getElementById("status");
+
+// Helpers
+function setStatus(msg, cls = "") {
+  statusEl.textContent = msg || "";
+  statusEl.className = `status ${cls}`.trim();
+}
+
+function isValidNumber(n) {
+  return Number.isInteger(n) && n >= 1 && n <= selectedRange;
+}
+
+function enableCheckIfValid() {
+  const val = parseInt(guessInput.value, 10);
+  checkBtn.disabled = !isValidNumber(val);
+}
 
 // Event listeners
-rangeRadios.forEach(radio => {
+rangeRadios.forEach((radio) => {
   radio.addEventListener("change", () => {
-    selectedRange = parseInt(radio.value);
+    selectedRange = parseInt(radio.value, 10);
     startBtn.disabled = false;
   });
 });
@@ -33,21 +49,34 @@ startBtn.addEventListener("click", () => {
   gamePlay.style.display = "block";
   rangeDisplay.textContent = selectedRange;
   guessesLeftDisplay.textContent = guessesLeft;
+
+  // Reset UI
+  guessesList.innerHTML = "";
+  setStatus(`Game started! Enter a number between 1 and ${selectedRange}.`, "ok");
+
+  // Prepare input
+  guessInput.value = "";
+  guessInput.min = 1;
+  guessInput.max = selectedRange;
+  checkBtn.disabled = true;
+  guessInput.focus();
 });
 
-checkBtn.addEventListener("click", () => {
-  const guess = parseInt(guessInput.value);
-  if (isNaN(guess) || guess < 1 || guess > selectedRange) {
-    alert("Please enter a valid number within the range.");
+function handleGuessSubmit() {
+  const guess = parseInt(guessInput.value, 10);
+  if (!isValidNumber(guess)) {
+    setStatus(`Please enter a whole number between 1 and ${selectedRange}.`, "err");
+    enableCheckIfValid();
+    guessInput.focus();
     return;
   }
 
   guessesLeft--;
   guessesLeftDisplay.textContent = guessesLeft;
 
-  const listItem = document.createElement("li");
-  listItem.textContent = guess;
-  guessesList.appendChild(listItem);
+  const li = document.createElement("li");
+  li.textContent = guess;
+  guessesList.appendChild(li);
 
   if (guess === targetNumber) {
     endGame(true);
@@ -55,17 +84,36 @@ checkBtn.addEventListener("click", () => {
     endGame(false);
   } else {
     const hint = guess > targetNumber ? "Too high. Try again!" : "Too low. Try again!";
-    alert(hint);
+    setStatus(hint, "warn");
+    guessInput.value = "";
+    enableCheckIfValid();
+    guessInput.focus();
   }
+}
 
-  guessInput.value = "";
+checkBtn.addEventListener("click", handleGuessSubmit);
+
+// Enable/disable Check dynamically and submit on Enter
+guessInput.addEventListener("input", () => {
+  enableCheckIfValid();
+  setStatus("");
 });
 
+guessInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !checkBtn.disabled) {
+    handleGuessSubmit();
+  }
+});
+
+// Play again
 playAgainBtn.addEventListener("click", () => {
   location.reload();
 });
 
 function endGame(isWin) {
-  gameOverMessage.textContent = isWin ? "Congratulations! You guessed the number!" : "No more guesses left. The number was " + targetNumber + ".";
+  setStatus("", "");
+  gameOverMessage.textContent = isWin
+    ? "Congratulations! You guessed the number!"
+    : `No more guesses left. The number was ${targetNumber}.`;
   gameOverModal.style.display = "flex";
 }
